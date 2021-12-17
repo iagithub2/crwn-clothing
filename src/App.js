@@ -1,17 +1,13 @@
 import './App.css';
 import { Routes, Route, useRoutes } from 'react-router-dom';
 import HomePage from './pages/homepage/homepage.component';
+import ShopPage from './pages/shop/shop.component';
 
-const HatsPage = () => (
-  <div>
-    <h1>HATS PAGE</h1>
-  </div>
-);
 
 function App() {
   let routes = useRoutes([
     { path: "/", element: <HomePage /> },
-    { path: "shop/hats", element: <HatsPage /> },
+    { path: "/shop", element: <ShopPage /> },
     // ...
   ]);
   return (
