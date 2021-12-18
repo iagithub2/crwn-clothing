@@ -5,7 +5,8 @@ import ShopPage from './pages/shop/shop.component';
 import SignInAndSignUp from './pages/sign-in-and-sign-up/sign-in-and-sign-up.component';
 import Header from './components/header/header.component';
 import React, { useState, useEffect } from 'react';
-import { auth } from './firebase/firebase.utils';
+import { auth, createUserProfileDocument } from './firebase/firebase.utils';
+import { onSnapshot } from "firebase/firestore";
 
 function App() {
   let routes = useRoutes([
@@ -15,14 +16,24 @@ function App() {
   ]);
 
   const [currentUser, setCurrentUser] = useState(null);
-  
+ 
   useEffect(() => {
+    (async () => {
     // code to run on component mount
-    auth.onAuthStateChanged(user => {
-      setCurrentUser(user);
-      console.log(user);
+    auth.onAuthStateChanged(async userAuth => {
+      if(userAuth){
+        const userDocRef = await createUserProfileDocument(userAuth);
+                onSnapshot(userDocRef, snapshot=>{
+          setCurrentUser({
+            id:snapshot.id,
+            ...snapshot.data()
+          }
+          );
+        });
+      }
     });
-  // code to run on component unmount
+    })();
+    // code to run on component unmount
     return () => {
       auth.onAuthStateChanged();
     };

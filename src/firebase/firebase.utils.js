@@ -1,6 +1,6 @@
 import firebase from 'firebase/compat/app';
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-
+import { getFirestore, collection, doc, getDoc, setDoc } from "firebase/firestore";
 
 
 const config = {
@@ -12,11 +12,13 @@ const config = {
     appId: "1:835644159224:web:ae2932d85524991bf1f70d"
   };
 
-  firebase.initializeApp(config);
-  const provider = new GoogleAuthProvider();
-  export const auth = getAuth();
+const app = firebase.initializeApp(config);
+const db = getFirestore(app);
+const provider = new GoogleAuthProvider();
+export const auth = getAuth();
 
-  const signInWithPopupCustom = async () => {
+
+export const signInWithPopupCustom = async () => {
     try{
         // This gives you a Google Access Token. You can use it to access the Google API.
         const result = await signInWithPopup(auth, provider);
@@ -35,4 +37,28 @@ const config = {
     }
 }
 
-export default signInWithPopupCustom;
+export const createUserProfileDocument = async (userAuth, additionalData) => {
+    if(!userAuth) return;
+
+    const userDocRef = doc(db, 'users', userAuth.uid)
+
+    const userDocSnap = await getDoc(userDocRef);
+   
+    if(!userDocSnap.exists()){
+        const { displayName, email } = userAuth;
+        const createdAt = new Date();
+
+        try {
+            await setDoc(doc(db, "users", userAuth.uid), {
+                displayName,
+                email,
+                createdAt,
+                ...additionalData
+              });
+        } catch (error) {
+            console.log('error creating user', error.message);
+        }
+    }
+    return userDocRef;
+
+}
