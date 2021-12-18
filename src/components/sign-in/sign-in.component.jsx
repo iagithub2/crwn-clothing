@@ -2,7 +2,8 @@ import React from 'react';
 import FormInput from '../form-input/form-input.component';
 import CustomButton from '../custom-button/custom-button.component';
 import './sign-in.styles.scss';
-import { signInWithPopupCustom }  from '../../firebase/firebase.utils';
+import { auth, signInWithPopupCustom }  from '../../firebase/firebase.utils';
+import { signInWithEmailAndPassword } from "firebase/auth";
 
 class SignIn extends React.Component {
 
@@ -17,7 +18,13 @@ class SignIn extends React.Component {
 
     handleSubmit = event => {
         event.preventDefault();
-        this.setState({email:'', password:''});
+        const { email, password } = this.state;
+        try{
+            signInWithEmailAndPassword(auth, email, password);
+            this.setState({email:'', password:''});
+        }catch(error){
+            console.log(error);
+        }
     }
 
     handleChange = event => {
