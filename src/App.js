@@ -7,8 +7,87 @@ import Header from './components/header/header.component';
 import React, { useState, useEffect } from 'react';
 import { auth, createUserProfileDocument } from './firebase/firebase.utils';
 import { onSnapshot } from "firebase/firestore";
+import { connect } from 'react-redux';
+import { setCurrentUser } from './redux/user/user.actions'
 
-function App() {
+
+class App extends React.Component{
+
+  unsubscribeFromAuth = null;
+
+  componentDidMount() {
+    const { setCurrentUser } = this.props;
+    this.unsubscribeFromAuth = auth.onAuthStateChanged(async userAuth => {
+      if(userAuth){
+        const userDocRef = await createUserProfileDocument(userAuth);
+          onSnapshot(userDocRef, snapshot=>{
+          setCurrentUser({
+            id:snapshot.id,
+            ...snapshot.data()
+          }
+          );
+        });
+      }else{
+        setCurrentUser(userAuth);
+      }
+    });
+  }
+
+  componentWillUnmount(){
+    this.unsubscribeFromAuth();
+  }
+
+  render(){
+    return (
+      <div className="App">
+        <Header/>
+        <RoutesHandler/>
+      </div>
+    );
+  } 
+} 
+
+const RoutesHandler = () => {
+  let routes = useRoutes([
+    { path: "/", element: <HomePage /> },
+    { path: "/shop", element: <ShopPage /> },
+    { path: "/signin", element: <SignInAndSignUp /> },
+  ]);
+
+  return <div>{routes}</div>;
+};
+
+const mapDispatchToProps = dispatch =>({
+  setCurrentUser : user => dispatch(setCurrentUser(user))
+});
+
+export default connect(null,mapDispatchToProps)(App);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*function AppFunctionalComponent() {
   let routes = useRoutes([
     { path: "/", element: <HomePage /> },
     { path: "/shop", element: <ShopPage /> },
@@ -30,6 +109,8 @@ function App() {
           }
           );
         });
+      }else{
+        setCurrentUser(userAuth);
       }
     });
     })();
@@ -41,10 +122,8 @@ function App() {
 
   return (
     <div className="App">
-      <Header currentUser = {currentUser}/>
+      <Header/>
       {routes}
     </div>
   );
-}
-
-export default App;
+}*/
