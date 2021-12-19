@@ -1,5 +1,5 @@
 import './App.css';
-import { Routes, Route, useRoutes } from 'react-router-dom';
+import { Routes, Route, useRoutes, Redirect } from 'react-router-dom';
 import HomePage from './pages/homepage/homepage.component';
 import ShopPage from './pages/shop/shop.component';
 import SignInAndSignUp from './pages/sign-in-and-sign-up/sign-in-and-sign-up.component';
@@ -41,27 +41,30 @@ class App extends React.Component{
     return (
       <div className="App">
         <Header/>
-        <RoutesHandler/>
+        <RoutesHandler currentUser={this.props.currentUser}/>
       </div>
     );
   } 
 } 
 
-const RoutesHandler = () => {
+const RoutesHandler = (props) => {
   let routes = useRoutes([
     { path: "/", element: <HomePage /> },
     { path: "/shop", element: <ShopPage /> },
-    { path: "/signin", element: <SignInAndSignUp /> },
+    { path: "/signin", element: props.currentUser? <HomePage />:<SignInAndSignUp /> },
   ]);
 
   return <div>{routes}</div>;
 };
 
+const mapStateToProps = ({user}) => ({
+  currentUser: user.currentUser  
+});
 const mapDispatchToProps = dispatch =>({
   setCurrentUser : user => dispatch(setCurrentUser(user))
 });
 
-export default connect(null,mapDispatchToProps)(App);
+export default connect(mapStateToProps,mapDispatchToProps)(App);
 
 
 
